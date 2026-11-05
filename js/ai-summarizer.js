@@ -104,6 +104,16 @@ function cleanJsonResponse(text = "") {
   return JSON.parse(cleaned);
 }
 
+function withTimeout(promise, ms, message) {
+  let timer = null;
+  const timeout = new Promise((resolve, reject) => {
+    timer = setTimeout(() => reject(new Error(message)), ms);
+  });
+  return Promise.race([promise, timeout]).finally(() => {
+    if (timer) clearTimeout(timer);
+  });
+}
+
 function normalizeAiSummary(payload, fallback) {
   const headline = truncate(payload.headline || payload.title || fallback.headline, 140);
   const intro = truncate(payload.intro || payload.summary || payload.introduction || fallback.intro, 900);
@@ -205,17 +215,29 @@ async function callBrowserAI(prompt) {
   const languageModel = globalThis.LanguageModel;
 
   if (languageModel?.availability && languageModel?.create) {
-    const availability = await languageModel.availability();
-    if (availability === "unavailable" || availability === "no") {
-      throw new Error("L'IA locale du navigateur n'est pas disponible.");
+    const availability = await withTimeout(
+      languageModel.availability(),
+      2500,
+      "L'IA locale met trop de temps à répondre."
+    );
+    if (!["available", "readily"].includes(availability)) {
+      throw new Error("Le modèle d'IA locale n'est pas encore prêt.");
     }
-    const session = await languageModel.create({
-      systemPrompt: SYSTEM_PROMPT,
-      temperature: 0.35,
-      topK: 32
-    });
+    const session = await withTimeout(
+      languageModel.create({
+        systemPrompt: SYSTEM_PROMPT,
+        temperature: 0.35,
+        topK: 32
+      }),
+      5000,
+      "Le modèle d'IA locale n'a pas pu démarrer."
+    );
     try {
-      const result = await session.prompt(prompt);
+      const result = await withTimeout(
+        session.prompt(prompt),
+        8000,
+        "L'IA locale met trop de temps à répondre."
+      );
       return cleanJsonResponse(result);
     } finally {
       session.destroy?.();
@@ -226,24 +248,44 @@ async function callBrowserAI(prompt) {
   const legacyAi = globalThis.ai;
   if (legacyAi) {
     if (typeof legacyAi.canCreateTextSession === "function") {
-      const availability = await legacyAi.canCreateTextSession();
-      if (availability === "no") {
-        throw new Error("L'IA locale du navigateur n'est pas disponible.");
+      const availability = await withTimeout(
+        legacyAi.canCreateTextSession(),
+        2500,
+        "L'IA locale met trop de temps à répondre."
+      );
+      if (!["readily", "available"].includes(availability)) {
+        throw new Error("Le modèle d'IA locale n'est pas encore prêt.");
       }
     }
     if (typeof legacyAi.createTextSession === "function") {
-      const session = await legacyAi.createTextSession();
+      const session = await withTimeout(
+        legacyAi.createTextSession(),
+        5000,
+        "Le modèle d'IA locale n'a pas pu démarrer."
+      );
       try {
-        const result = await session.prompt(`${SYSTEM_PROMPT}\n\n${prompt}`);
+        const result = await withTimeout(
+          session.prompt(`${SYSTEM_PROMPT}\n\n${prompt}`),
+          8000,
+          "L'IA locale met trop de temps à répondre."
+        );
         return cleanJsonResponse(result);
       } finally {
         session.destroy?.();
       }
     }
     if (legacyAi.languageModel?.create) {
-      const session = await legacyAi.languageModel.create({ systemPrompt: SYSTEM_PROMPT });
+      const session = await withTimeout(
+        legacyAi.languageModel.create({ systemPrompt: SYSTEM_PROMPT }),
+        5000,
+        "Le modèle d'IA locale n'a pas pu démarrer."
+      );
       try {
-        const result = await session.prompt(prompt);
+        const result = await withTimeout(
+          session.prompt(prompt),
+          8000,
+          "L'IA locale met trop de temps à répondre."
+        );
         return cleanJsonResponse(result);
       } finally {
         session.destroy?.();
@@ -320,7 +362,7 @@ function buildExtractiveSummary(eligible, excluded, now = Date.now()) {
 
   const keyBiasLabels = [...new Set(sorted.map((article) => BIAS_META[String(article.bias)]?.short || "Centre"))];
   const watch = excluded.length
-    ? `${excluded.length} article${excluded.length > 1 ? "s" : ""} provenant de sources classées extrêmes a été écarté${excluded.length > 1 ? "s" : ""} de cette synthèse, conformément à la règle éditoriale.`
+    ? `${excluded.length} article${excluded.length > 1 ? "s" : ""} provenant de sources classées extrêmes ${excluded.length > 1 ? "ont été écartés" : "a été écarté"} de cette synthèse, conformément à la règle éditoriale.`
     : `Aucune source classée extrême n'a été retenue dans la fenêtre de 24 heures. Lignes représentées : ${keyBiasLabels.join(", ") || "centre"}.`;
 
   return {
@@ -451,7 +493,7 @@ export function summaryToMarkdown(summary) {
   lines.push(
     "---",
     `Généré le ${new Intl.DateTimeFormat("fr-FR", { dateStyle: "long", timeStyle: "short" }).format(new Date(summary.generatedAt || Date.now()))}.`,
-    `Méthode : ${summary.provider || "Tourmaline"} · ${summary.analyzedCount || 0} articles analysés · ${summary.excludedCount || 0} source(s) extrême(s) exclue(s).`
+    `Méthode : ${summary.provider || "Tourmaline"} · ${summary.analyzedCount || 0} articles analysés · ${summary.excludedCount || 0} article(s) extrême(s) écarté(s).`
   );
 
   return lines.join("\n");

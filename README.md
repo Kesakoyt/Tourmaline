@@ -65,6 +65,12 @@ Ouvrez ensuite <http://localhost:8080>.
 
 L'application démarre **sans configuration** en mode invité : les préférences, sources et favoris sont stockés dans le `localStorage`. Si aucun flux n'est accessible, des articles de démonstration clairement identifiés sont affichés.
 
+Cinq sources françaises sont actives par défaut : **Le Monde**, **Le Figaro**, **France 24**, **L'Express** et **Mediapart**. Franceinfo, BBC World, The Guardian, ProPublica, Al Jazeera et Révolution permanente restent configurées mais désactivées : activez-les depuis **Moi → Flux RSS & médias**.
+
+### Ingestion des flux
+
+Les flux RSS passent d'abord par **rss2json**, puis basculent automatiquement sur des proxys CORS publics (`proxy.corsfix.com`, `api.allorigins.win`, `api.codetabs.com`) si le service est saturé ou refuse la requête. Le chargement est progressif : les premiers articles s'affichent dès qu'une source répond, avec une limite globale de 15 secondes. NewsAPI et GNews complètent le fil lorsqu'une clé est renseignée.
+
 ## Configuration des clés API
 
 Deux méthodes, au choix.
@@ -158,7 +164,7 @@ Le fichier `.nojekyll` est déjà présent : il évite que GitHub Pages ignore c
 
 - **Clés côté client** : visibles dans le navigateur et le réseau. Pour une mise en production à fort trafic, utilisez un backend/proxy (Cloud Functions, Worker) et des restrictions de clé par domaine.
 - **NewsAPI** : l'offre gratuite limite souvent les appels depuis un domaine de production. GNews et les flux RSS restent les sources principales.
-- **rss2json** : le proxy public peut renvoyer `HTTP 429` en cas d'appels simultanés. Tourmaline limite la concurrence et bascule sur des proxys de secours, mais les flux peuvent être partiellement indisponibles.
+- **rss2json** : le proxy public peut renvoyer `HTTP 429` en cas d'appels simultanés. Tourmaline limite la concurrence (4 requêtes) et bascule sur des proxys de secours (`corsfix`, `allorigins`, `codetabs`), mais certains flux peuvent rester partiellement indisponibles. Franceinfo renvoie notamment `403` via proxy ; activez-la si votre réseau le permet.
 - **Classement éditorial** : attribution indicative par source, stockée dans `js/news-service.js`. Elle peut être ajustée manuellement dans la liste des sources.
 - **Synthèse IA** : peut comporter des imprécisions. Les sources originales restent la référence ; un avertissement est affiché dans l'application.
 - **PDF** : l'export utilise `html2pdf.js` (CDN). Les images sont retirées du document exporté pour éviter les erreurs CORS ; utilisez l'impression pour une version enrichie.

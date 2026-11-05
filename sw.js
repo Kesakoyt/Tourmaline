@@ -6,7 +6,7 @@
      - Actualités / API / proxys RSS                             : network-first
    ========================================================================== */
 
-const VERSION = "1.0.0";
+const VERSION = "1.1.3";
 const CACHE_APP = `tourmaline-app-v${VERSION}`;
 const CACHE_MEDIA = `tourmaline-media-v${VERSION}`;
 const CACHE_NEWS = `tourmaline-news-v${VERSION}`;
@@ -26,6 +26,7 @@ const APP_SHELL = [
   "assets/icons/icon-192.png",
   "assets/icons/icon-512.png",
   "assets/icons/maskable-512.png",
+  "assets/icons/source-diamond.png",
   "assets/news/archive.jpg",
   "assets/news/city.jpg",
   "assets/news/climate.jpg",
@@ -40,16 +41,20 @@ const NEWS_HOSTS = [
   "api.rss2json.com",
   "newsapi.org",
   "gnews.io",
+  "proxy.corsfix.com",
   "api.allorigins.win",
   "api.codetabs.com",
   "feeds.bbci.co.uk",
   "www.lemonde.fr",
   "www.lefigaro.fr",
   "www.francetvinfo.fr",
+  "www.france24.com",
+  "www.lexpress.fr",
   "www.mediapart.fr",
   "www.theguardian.com",
   "www.propublica.org",
-  "www.aljazeera.com"
+  "www.aljazeera.com",
+  "www.revolutionpermanente.fr"
 ];
 
 const ICONS_HOST = "img.icons8.com";

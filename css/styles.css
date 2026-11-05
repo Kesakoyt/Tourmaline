@@ -47,9 +47,9 @@
 
   --radius-xs: 8px;
   --radius-sm: 10px;
-  --radius: 14px;
-  --radius-lg: 20px;
-  --radius-xl: 28px;
+  --radius: 12px;
+  --radius-lg: 12px;
+  --radius-xl: 12px;
 
   --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   --shadow-md: 0 10px 28px rgba(26, 51, 54, 0.07);
@@ -816,7 +816,7 @@ body:not(.app-ready) .app-shell {
   padding: 7px 6px;
   background: rgba(255, 255, 255, 0.82);
   border: 1px solid rgba(255, 255, 255, 0.9);
-  border-radius: 20px;
+  border-radius: 12px;
   box-shadow: 0 12px 40px rgba(23, 48, 54, 0.16), inset 0 1px 0 #fff;
   backdrop-filter: blur(24px) saturate(1.3);
   -webkit-backdrop-filter: blur(24px) saturate(1.3);
@@ -4417,7 +4417,7 @@ body:not(.app-ready) .app-shell {
   overflow: hidden;
   background: rgba(255, 255, 255, 0.92);
   border: 1px solid rgba(255, 255, 255, 0.96);
-  border-radius: 18px;
+  border-radius: 12px;
   box-shadow: 0 30px 80px rgba(4, 28, 32, 0.24), inset 0 1px 0 #fff;
   backdrop-filter: blur(26px) saturate(1.25);
   animation: searchIn 0.28s var(--ease);
@@ -4962,7 +4962,7 @@ body:not(.app-ready) .app-shell {
   .summary-hero {
     min-height: 0;
     padding: 32px 25px 35px;
-    border-radius: 22px;
+    border-radius: 12px;
   }
 
   .summary-hero h1 {

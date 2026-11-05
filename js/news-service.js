@@ -95,6 +95,28 @@ export const DEFAULT_SOURCES = Object.freeze([
     bias: 0,
     category: "societe",
     country: "FR",
+    active: false,
+    investigation: false,
+    isDefault: true
+  },
+  {
+    id: "france24",
+    name: "France 24",
+    url: "https://www.france24.com/fr/rss",
+    bias: 0,
+    category: "monde",
+    country: "FR",
+    active: true,
+    investigation: false,
+    isDefault: true
+  },
+  {
+    id: "lexpress",
+    name: "L'Express",
+    url: "https://www.lexpress.fr/rss/alaune.xml",
+    bias: 1,
+    category: "politique",
+    country: "FR",
     active: true,
     investigation: false,
     isDefault: true
@@ -117,7 +139,7 @@ export const DEFAULT_SOURCES = Object.freeze([
     bias: 0,
     category: "monde",
     country: "GB",
-    active: true,
+    active: false,
     investigation: false,
     isDefault: true
   },
@@ -874,7 +896,7 @@ export function parseRssXml(xmlText, source = {}) {
 async function fetchRssViaRss2Json(source, settings = {}) {
   const key = settings.rss2jsonKey ? `&api_key=${encodeURIComponent(settings.rss2jsonKey)}` : "";
   const endpoint = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(source.url)}&count=20${key}`;
-  const data = await fetchJson(endpoint, { timeout: 18000 });
+  const data = await fetchJson(endpoint, { timeout: 9000 });
   if (data.status !== "ok" || !Array.isArray(data.items)) {
     throw new Error(data.message || data.error || "Flux RSS indisponible.");
   }
@@ -893,6 +915,7 @@ async function fetchRssViaRss2Json(source, settings = {}) {
 async function fetchRssViaProxy(source) {
   const target = encodeURIComponent(source.url);
   const proxies = [
+    `https://proxy.corsfix.com/?${source.url}`,
     `https://api.allorigins.win/raw?url=${target}`,
     `https://api.codetabs.com/v1/proxy?quest=${target}`
   ];
@@ -900,7 +923,7 @@ async function fetchRssViaProxy(source) {
 
   for (const proxy of proxies) {
     try {
-      const xml = await fetchText(proxy, { timeout: 14000 });
+      const xml = await fetchText(proxy, { timeout: 9000 });
       return parseRssXml(xml, source);
     } catch (error) {
       lastError = error;
@@ -911,21 +934,25 @@ async function fetchRssViaProxy(source) {
 }
 
 export async function fetchRssSource(source, settings = {}) {
+  let primaryError = null;
+
   try {
     const articles = await fetchRssViaRss2Json(source, settings);
     return { source, articles, provider: "rss2json", error: null };
-  } catch (primaryError) {
-    try {
-      const articles = await fetchRssViaProxy(source);
-      return { source, articles, provider: "proxy", error: null };
-    } catch (fallbackError) {
-      return {
-        source,
-        articles: [],
-        provider: "none",
-        error: fallbackError.message || primaryError.message || "Flux indisponible"
-      };
-    }
+  } catch (error) {
+    primaryError = error;
+  }
+
+  try {
+    const articles = await fetchRssViaProxy(source);
+    return { source, articles, provider: "proxy", error: null };
+  } catch (fallbackError) {
+    return {
+      source,
+      articles: [],
+      provider: "none",
+      error: fallbackError.message || primaryError?.message || "Flux indisponible"
+    };
   }
 }
 
@@ -934,7 +961,12 @@ export async function fetchRssSource(source, settings = {}) {
  * les services publics (rss2json notamment).
  */
 export async function fetchAllSources(sources = [], settings = {}, options = {}) {
-  const { maxSources = 14, concurrency = 2, onProgress = null } = options;
+  const {
+    maxSources = 14,
+    concurrency = 4,
+    onProgress = null,
+    deadlineMs = 15000
+  } = options;
   const active = sources
     .filter((source) => source.active && !source.isDemo && source.url)
     .slice(0, maxSources);
@@ -942,17 +974,39 @@ export async function fetchAllSources(sources = [], settings = {}, options = {})
   const results = [];
   let cursor = 0;
   let completed = 0;
+  const deadline = Date.now() + deadlineMs;
+
+  async function fetchWithDeadline(source) {
+    const remaining = deadline - Date.now();
+    if (remaining <= 250) {
+      return { source, articles: [], provider: "none", error: "Délai de chargement dépassé" };
+    }
+
+    let timer = null;
+    const expired = new Promise((resolve) => {
+      timer = setTimeout(
+        () => resolve({ source, articles: [], provider: "none", error: "Délai de chargement dépassé" }),
+        remaining
+      );
+    });
+
+    try {
+      return await Promise.race([fetchRssSource(source, settings), expired]);
+    } finally {
+      if (timer) clearTimeout(timer);
+    }
+  }
 
   async function worker() {
     while (cursor < active.length) {
       const currentIndex = cursor;
       cursor += 1;
       const source = active[currentIndex];
-      const result = await fetchRssSource(source, settings);
+      const result = await fetchWithDeadline(source);
       results.push(result);
       completed += 1;
       onProgress?.({ completed, total: active.length, source, result });
-      await delay(280);
+      if (Date.now() < deadline) await delay(280);
     }
   }
 
@@ -1070,9 +1124,9 @@ export async function fetchGNews(settings = {}) {
    Orchestrateur
    -------------------------------------------------------------------------- */
 
-export async function fetchLiveNews({ sources = [], settings = {}, onProgress = null } = {}) {
+export async function fetchLiveNews({ sources = [], settings = {}, onProgress = null, options = {} } = {}) {
   const [rssResult, newsApiResult, gNewsResult] = await Promise.allSettled([
-    fetchAllSources(sources, settings, { onProgress }),
+    fetchAllSources(sources, settings, { ...options, onProgress }),
     fetchNewsApi(settings),
     fetchGNews(settings)
   ]);

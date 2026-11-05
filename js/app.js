@@ -1497,13 +1497,46 @@ async function loadNews({ manual = false, silent = false } = {}) {
   if (progressLabel && !state.articles.length) progressLabel.textContent = "Connexion aux sources…";
   if (wasInitial) renderActiveView();
 
+  let demoTimer = null;
+  if (wasInitial && !state.articles.length) {
+    demoTimer = setTimeout(() => {
+      if (state.articles.length) return;
+      state.articles = getDemoArticles();
+      state.demoMode = true;
+      state.lastUpdated = new Date();
+      renderFeedViews();
+      updateFeedMeta();
+      updateUrgentBadge();
+    }, 4000);
+  }
+
+  const partialArticles = [];
+
   try {
     const result = await fetchLiveNews({
       sources: state.sources,
       settings: getApiSettings(),
-      onProgress: ({ completed, total }) => {
-        if (!progressLabel || silent) return;
-        progressLabel.textContent = `Sources ${completed}/${total}…`;
+      options: { deadlineMs: 15000 },
+      onProgress: ({ completed, total, result: sourceResult }) => {
+        if (progressLabel && !silent) {
+          progressLabel.textContent = `Sources ${completed}/${total}…`;
+        }
+        if (!sourceResult?.articles?.length) return;
+        if (demoTimer) {
+          clearTimeout(demoTimer);
+          demoTimer = null;
+        }
+        if (silent) return;
+
+        partialArticles.push(...sourceResult.articles);
+        const cached = recentArticles(state.articles.filter((article) => !article.isDemo));
+        state.articles = mergeArticles(partialArticles, cached);
+        state.demoMode = false;
+        state.stale = false;
+        state.lastUpdated = new Date();
+        renderFeedViews();
+        updateFeedMeta();
+        updateUrgentBadge();
       }
     });
 
@@ -1550,6 +1583,7 @@ async function loadNews({ manual = false, silent = false } = {}) {
       state.lastUpdated = new Date();
     }
   } finally {
+    if (demoTimer) clearTimeout(demoTimer);
     state.loading = false;
     state.initialLoadDone = true;
     setRefreshBusy(false);
