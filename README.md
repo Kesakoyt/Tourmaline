@@ -107,8 +107,10 @@ Le résumé du jour est mis en cache dans le `localStorage` et, si un compte est
 
 ## Configuration Firebase
 
-1. Créez un projet sur <https://console.firebase.google.com>.
-2. Ajoutez une application **Web** et copiez les identifiants dans `js/firebase-config.js`.
+Le projet Firebase **`tourmaline-15bb0`** est déjà renseigné dans `js/firebase-config.js`.
+
+1. Projet : <https://console.firebase.google.com/project/tourmaline-15bb0>.
+2. Les identifiants Web sont déjà configurés dans `js/firebase-config.js` (clés publiques côté client).
 3. Activez **Authentication → Sign-in method → E-mail/Mot de passe**.
 4. Créez la base **Firestore** (mode production).
 5. Déployez les règles fournies :

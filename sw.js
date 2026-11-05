@@ -6,7 +6,7 @@
      - Actualités / API / proxys RSS                             : network-first
    ========================================================================== */
 
-const VERSION = "1.1.3";
+const VERSION = "1.1.4";
 const CACHE_APP = `tourmaline-app-v${VERSION}`;
 const CACHE_MEDIA = `tourmaline-media-v${VERSION}`;
 const CACHE_NEWS = `tourmaline-news-v${VERSION}`;

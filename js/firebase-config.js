@@ -5,17 +5,17 @@
    Collez ici les identifiants de votre projet.
    ========================================================================== */
 
-// 🔑 EMPLACEMENT DES IDENTIFIANTS FIREBASE
-// Remplacez chaque valeur ci-dessous par celle fournie par la console Firebase.
+// 🔑 IDENTIFIANTS FIREBASE
+// Projet : tourmaline-15bb0
 // Ces clés sont publiques par nature (elles identifient le projet côté client) :
 // la sécurité réelle est assurée par Firebase Auth + les règles Firestore.
 export const firebaseConfig = {
-  apiKey: "AIzaSy...",                                        // <-- Coller votre apiKey ici
-  authDomain: "tourmaline-xxx.firebaseapp.com",                // <-- Votre domaine Auth
-  projectId: "tourmaline-xxx",                                 // <-- Votre projectId
-  storageBucket: "tourmaline-xxx.appspot.com",                 // <-- Votre storageBucket
-  messagingSenderId: "123456789",                              // <-- Votre messagingSenderId
-  appId: "1:123456789:web:abcdef..."                           // <-- Votre appId Web
+  apiKey: "AIzaSyAFEiUfLeKpFe5qU2YgYSsmgWLtXN8sKLY",
+  authDomain: "tourmaline-15bb0.firebaseapp.com",
+  projectId: "tourmaline-15bb0",
+  storageBucket: "tourmaline-15bb0.firebasestorage.app",
+  messagingSenderId: "827890539094",
+  appId: "1:827890539094:web:59cc0509d5adfd690139f7"
 };
 
 /* ==========================================================================
