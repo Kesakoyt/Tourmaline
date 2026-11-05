@@ -1,0 +1,60 @@
+{
+  "id": "./",
+  "name": "Tourmaline — L'actualité en clair",
+  "short_name": "Tourmaline",
+  "description": "Une lecture claire, équilibrée et synthétique de l'actualité : fil en direct, alertes, enquêtes et résumé IA quotidien.",
+  "lang": "fr",
+  "dir": "ltr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#f3f3f3",
+  "theme_color": "#f3f3f3",
+  "categories": ["news", "magazines", "productivity"],
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icons/maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Urgent",
+      "short_name": "Urgent",
+      "description": "Les alertes des dernières 24 heures",
+      "url": "./#urgent",
+      "icons": [{ "src": "assets/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Résumé du jour",
+      "short_name": "Résumé",
+      "description": "La synthèse IA quotidienne",
+      "url": "./#summary",
+      "icons": [{ "src": "assets/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Enquêtes",
+      "short_name": "Enquêtes",
+      "description": "Les longs formats et enquêtes",
+      "url": "./#investigations",
+      "icons": [{ "src": "assets/icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

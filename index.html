@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="Tourmaline — une lecture claire, équilibrée et synthétique de l'actualité. Flux en direct, alertes, enquêtes et résumé IA quotidien.">
+  <meta name="theme-color" content="#f3f3f3">
+  <meta name="color-scheme" content="light">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Tourmaline">
+  <meta property="og:title" content="Tourmaline — L'actualité en clair">
+  <meta property="og:description" content="Une lecture claire, équilibrée et synthétique de l'actualité.">
+  <meta property="og:type" content="website">
+  <title>Tourmaline — L'actualité en clair</title>
+
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="assets/icons/icon-192.png">
+  <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
+  <link rel="preconnect" href="https://img.icons8.com" crossorigin>
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://api.rss2json.com" crossorigin>
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Aller au contenu principal</a>
+
+  <div class="app-loader" id="app-loader" aria-live="polite">
+    <div class="app-loader__mark">
+      <img src="https://img.icons8.com/fluency/200/diamond.png" alt="" width="48" height="48">
+      <span class="app-loader__halo"></span>
+    </div>
+    <p class="app-loader__name">Tourmaline</p>
+    <p class="app-loader__hint">L'actualité en clair</p>
+    <div class="app-loader__bar"><span></span></div>
+  </div>
+
+  <div class="ambient" aria-hidden="true">
+    <span class="ambient__orb ambient__orb--teal"></span>
+    <span class="ambient__orb ambient__orb--blue"></span>
+    <span class="ambient__orb ambient__orb--rose"></span>
+    <span class="ambient__grain"></span>
+  </div>
+
+  <div class="app-shell" id="app-shell">
+    <aside class="sidebar" aria-label="Navigation principale">
+      <div class="brand">
+        <span class="brand__icon">
+          <img src="https://img.icons8.com/fluency/200/diamond.png" alt="" width="28" height="28">
+        </span>
+        <span class="brand__text">
+          <strong>Tourmaline</strong>
+          <small>L'actualité en clair</small>
+        </span>
+      </div>
+
+      <nav class="side-nav" aria-label="Navigation des sections">
+        <button class="side-nav__item" type="button" data-nav="home">
+          <span class="side-nav__icon"><img src="https://img.icons8.com/fluency/200/home.png" alt="" width="24" height="24"></span>
+          <span>Accueil</span>
+        </button>
+        <button class="side-nav__item" type="button" data-nav="urgent">
+          <span class="side-nav__icon"><img src="https://img.icons8.com/fluency/200/fire-element.png" alt="" width="24" height="24"></span>
+          <span>Urgent</span>
+          <span class="side-nav__badge side-nav__badge--live" id="urgent-nav-badge" hidden></span>
+        </button>
+        <button class="side-nav__item side-nav__item--primary" type="button" data-nav="summary">
+          <span class="side-nav__icon"><img src="https://img.icons8.com/fluency/200/artificial-intelligence.png" alt="" width="24" height="24"></span>
+          <span>Résumé</span>
+          <span class="side-nav__badge">IA</span>
+        </button>
+        <button class="side-nav__item" type="button" data-nav="investigations">
+          <span class="side-nav__icon"><img src="https://img.icons8.com/fluency/200/microscope.png" alt="" width="24" height="24"></span>
+          <span>Enquêtes</span>
+        </button>
+        <button class="side-nav__item" type="button" data-nav="me">
+          <span class="side-nav__icon"><img src="https://img.icons8.com/fluency/200/user-account.png" alt="" width="24" height="24"></span>
+          <span>Moi</span>
+        </button>
+      </nav>
+
+      <div class="sidebar__spacer"></div>
+
+      <div class="sidebar-summary">
+        <div class="sidebar-summary__top">
+          <span class="live-dot"></span>
+          <span>Résumé du jour</span>
+        </div>
+        <p id="sidebar-summary-text">La synthèse équilibrée des dernières 24 heures, sans les extrêmes.</p>
+        <button class="sidebar-summary__link" type="button" data-nav="summary">
+          Lire la synthèse
+          <img src="https://img.icons8.com/fluency/200/chevron-right.png" alt="" width="16" height="16">
+        </button>
+      </div>
+
+      <button class="sidebar-user" type="button" data-nav="me" id="sidebar-user">
+        <span class="avatar avatar--sm" id="sidebar-avatar">T</span>
+        <span class="sidebar-user__copy">
+          <strong id="sidebar-user-name">Mode invité</strong>
+          <small id="sidebar-user-status">Synchronisation locale</small>
+        </span>
+        <img src="https://img.icons8.com/fluency/200/settings.png" alt="" width="18" height="18">
+      </button>
+
+      <p class="sidebar-attribution">
+        Icônes <a href="https://icons8.com" target="_blank" rel="noopener">Icons8</a>
+      </p>
+    </aside>
+
+    <div class="app-main">
+      <header class="topbar" id="topbar">
+        <div class="topbar__brand">
+          <span class="brand__icon brand__icon--compact">
+            <img src="https://img.icons8.com/fluency/200/diamond.png" alt="" width="24" height="24">
+          </span>
+          <span>
+            <strong id="topbar-title">Accueil</strong>
+            <small id="topbar-kicker">Fil en direct</small>
+          </span>
+        </div>
+
+        <div class="topbar__actions">
+          <span class="connection-pill" id="connection-pill" title="État de la connexion">
+            <span class="connection-pill__dot"></span>
+            <span id="connection-label">En ligne</span>
+          </span>
+          <button class="icon-btn" type="button" id="global-search-btn" aria-label="Rechercher dans l'actualité" title="Rechercher (Ctrl+K)">
+            <img src="https://img.icons8.com/fluency/200/search.png" alt="" width="22" height="22">
+          </button>
+          <button class="icon-btn" type="button" id="refresh-btn" aria-label="Actualiser le fil" title="Actualiser le fil">
+            <img src="https://img.icons8.com/fluency/200/refresh.png" alt="" width="22" height="22">
+          </button>
+          <button class="icon-btn icon-btn--install" type="button" id="install-topbar" aria-label="Installer Tourmaline" title="Installer l'application" hidden>
+            <img src="https://img.icons8.com/fluency/200/download.png" alt="" width="22" height="22">
+          </button>
+          <button class="avatar avatar--topbar" type="button" id="topbar-avatar" data-nav="me" aria-label="Ouvrir mon profil">T</button>
+        </div>
+      </header>
+
+      <main id="main-content" class="main-content">
+        <!-- ACCUEIL -->
+        <section class="view view--active" id="view-home" data-view="home" aria-labelledby="home-title">
+          <div class="page-head page-head--home">
+            <div class="page-head__copy">
+              <p class="eyebrow"><span class="live-dot"></span> Fil en direct <span class="eyebrow__sep">·</span> <span id="home-date">Aujourd'hui</span></p>
+              <h1 id="home-title">L'essentiel, <span class="text-gradient">en clair.</span></h1>
+              <p class="lede">Toutes les sensibilités, une lecture apaisée. Tourmaline agrège l'actualité et vous donne les clés pour comprendre.</p>
+            </div>
+            <div class="page-head__actions">
+              <button class="btn btn--primary" type="button" data-action="refresh">
+                <img src="https://img.icons8.com/fluency/200/refresh.png" alt="" width="18" height="18">
+                Actualiser
+              </button>
+              <button class="btn btn--glass" type="button" data-nav="summary">
+                <img src="https://img.icons8.com/fluency/200/artificial-intelligence.png" alt="" width="18" height="18">
+                Résumé IA
+              </button>
+            </div>
+          </div>
+
+          <div class="home-layout">
+            <div class="feed-column">
+              <div class="feed-toolbar">
+                <div class="chip-row" id="category-chips" role="group" aria-label="Filtrer par catégorie">
+                  <button class="chip chip--active" type="button" data-category="all">Tout</button>
+                  <button class="chip" type="button" data-category="monde">Monde</button>
+                  <button class="chip" type="button" data-category="politique">Politique</button>
+                  <button class="chip" type="button" data-category="economie">Économie</button>
+                  <button class="chip" type="button" data-category="tech">Tech</button>
+                  <button class="chip" type="button" data-category="societe">Société</button>
+                  <button class="chip" type="button" data-category="environnement">Environnement</button>
+                  <button class="chip" type="button" data-category="culture">Culture</button>
+                </div>
+                <button class="filter-btn" type="button" id="filter-toggle" aria-expanded="false" aria-controls="filter-panel">
+                  <img src="https://img.icons8.com/fluency/200/filter.png" alt="" width="18" height="18">
+                  Filtres
+                  <span class="filter-btn__count" id="filter-count" hidden>0</span>
+                </button>
+              </div>
+
+              <div class="filter-panel" id="filter-panel" hidden>
+                <div class="filter-panel__head">
+                  <div>
+                    <p class="eyebrow">Affiner le fil</p>
+                    <h2>Votre équilibre éditorial</h2>
+                  </div>
+                  <button class="icon-btn icon-btn--small" type="button" data-action="close-filters" aria-label="Fermer les filtres">
+                    <img src="https://img.icons8.com/fluency/200/delete-sign.png" alt="" width="18" height="18">
+                  </button>
+                </div>
+                <div class="filter-panel__grid">
+                  <div class="filter-group filter-group--wide">
+                    <div class="filter-group__label">
+                      <span>Ligne éditoriale</span>
+                      <label class="switch switch--text">
+                        <input type="checkbox" id="bias-all-home" checked>
+                        <span class="switch__track"><span class="switch__thumb"></span></span>
+                        <span class="switch__label">Toutes</span>
+                      </label>
+                    </div>
+                    <div class="spectrum spectrum--interactive" id="home-spectrum">
+                      <input type="range" id="bias-slider-home" min="-2" max="2" step="1" value="0" aria-label="Filtrer par ligne éditoriale">
+                      <div class="spectrum__rail" aria-hidden="true"></div>
+                      <div class="spectrum__markers" aria-hidden="true">
+                        <span data-bias="-2">Extrême gauche</span>
+                        <span data-bias="-1">Centre gauche</span>
+                        <span data-bias="0">Centre</span>
+                        <span data-bias="1">Centre droit</span>
+                        <span data-bias="2">Extrême droite</span>
+                      </div>
+                    </div>
+                    <p class="filter-hint">Le filtre s'applique à la source de chaque article. Les extrêmes restent exclus du Résumé IA.</p>
+                  </div>
+                  <label class="filter-group">
+                    <span class="filter-group__label">Pays / région</span>
+                    <span class="select-wrap">
+                      <select id="country-filter">
+                        <option value="all">Tous les pays</option>
+                        <option value="FR">France</option>
+                        <option value="GB">Royaume-Uni</option>
+                        <option value="US">États-Unis</option>
+                        <option value="INT">International</option>
+                      </select>
+                      <img src="https://img.icons8.com/fluency/200/chevron-down.png" alt="" width="16" height="16">
+                    </span>
+                  </label>
+                  <label class="filter-group">
+                    <span class="filter-group__label">Trier par</span>
+                    <span class="select-wrap">
+                      <select id="sort-filter">
+                        <option value="recent">Plus récent</option>
+                        <option value="balanced">Équilibre éditorial</option>
+                        <option value="urgent">Priorité info</option>
+                      </select>
+                      <img src="https://img.icons8.com/fluency/200/chevron-down.png" alt="" width="16" height="16">
+                    </span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="feed-meta">
+                <div class="feed-meta__left">
+                  <span id="home-count">Chargement du fil…</span>
+                  <span class="feed-meta__dot"></span>
+                  <span id="last-updated">Mise à jour en cours</span>
+                </div>
+                <div class="feed-meta__right">
+                  <span class="live-dot live-dot--small"></span>
+                  <span id="live-status">Direct</span>
+                </div>
+              </div>
+
+              <div class="news-grid" id="home-feed" aria-live="polite" aria-busy="true"></div>
+              <div class="feed-footer">
+                <button class="btn btn--ghost" type="button" id="load-more" hidden>Charger plus d'articles</button>
+                <p id="feed-footer-note">Tourmaline ne remplace pas la lecture des sources originales.</p>
+              </div>
+            </div>
+
+            <aside class="home-rail" aria-label="En complément">
+              <article class="rail-card rail-card--summary">
+                <div class="rail-card__glow" aria-hidden="true"></div>
+                <div class="rail-card__kicker">
+                  <span class="spark-badge"><img src="https://img.icons8.com/fluency/200/artificial-intelligence.png" alt="" width="15" height="15"> IA</span>
+                  <span>24 dernières heures</span>
+                </div>
+                <h2>Le résumé<br>du jour</h2>
+                <p id="summary-teaser">Une synthèse neutre de l'actualité, générée sans les sources extrêmes.</p>
+                <div class="rail-card__stats">
+                  <span><strong id="teaser-analyzed">—</strong> articles</span>
+                  <span><strong id="teaser-excluded">—</strong> exclus</span>
+                </div>
+                <button class="btn btn--light" type="button" data-nav="summary">
+                  Lire la synthèse
+                  <img src="https://img.icons8.com/fluency/200/chevron-right.png" alt="" width="16" height="16">
+                </button>
+                <button class="rail-card__quiet" type="button" data-action="generate-summary">Régénérer la synthèse</button>
+              </article>
+
+              <article class="rail-card rail-card--balance">
+                <div class="rail-card__head">
+                  <h3>Équilibre du fil</h3>
+                  <img src="https://img.icons8.com/fluency/200/scales.png" alt="" width="22" height="22">
+                </div>
+                <p>Répartition des sources dans le flux chargé.</p>
+                <div class="balance-chart" id="balance-chart" aria-label="Répartition politique des sources"></div>
+                <div class="balance-legend">
+                  <span><i class="legend-dot legend-dot--far-left"></i>Extrême gauche</span>
+                  <span><i class="legend-dot legend-dot--left"></i>Centre gauche</span>
+                  <span><i class="legend-dot legend-dot--center"></i>Centre</span>
+                  <span><i class="legend-dot legend-dot--right"></i>Centre droit</span>
+                  <span><i class="legend-dot legend-dot--far-right"></i>Extrême droite</span>
+                </div>
+              </article>
+
+              <article class="rail-card rail-card--trending">
+                <div class="rail-card__head">
+                  <h3>À suivre</h3>
+                  <span class="live-dot live-dot--small"></span>
+                </div>
+                <div class="trending-list" id="trending-list">
+                  <p class="muted">Chargement des tendances…</p>
+                </div>
+              </article>
+            </aside>
+          </div>
+        </section>
+
+        <!-- URGENT -->
+        <section class="view" id="view-urgent" data-view="urgent" aria-labelledby="urgent-title" hidden>
+          <div class="page-head page-head--urgent">
+            <div class="page-head__copy">
+              <p class="eyebrow eyebrow--urgent"><span class="live-dot live-dot--urgent"></span> Cellule veille <span class="eyebrow__sep">·</span> <span id="urgent-date">Dernières 24 h</span></p>
+              <h1 id="urgent-title">L'actualité<br><span class="text-urgent">qui compte.</span></h1>
+              <p class="lede">Les signaux forts, alertes et développements critiques des dernières 24 heures, hiérarchisés par notre moteur de priorité.</p>
+            </div>
+            <div class="urgent-seal">
+              <img src="https://img.icons8.com/fluency/200/fire-element.png" alt="" width="34" height="34">
+              <span>Veille<br><strong>active</strong></span>
+            </div>
+          </div>
+
+          <div class="metric-row">
+            <div class="metric">
+              <span class="metric__label">Alertes critiques</span>
+              <strong id="urgent-alerts">—</strong>
+              <small>détectées sur 24 h</small>
+            </div>
+            <div class="metric">
+              <span class="metric__label">Sources mobilisées</span>
+              <strong id="urgent-sources">—</strong>
+              <small>flux actifs</small>
+            </div>
+            <div class="metric">
+              <span class="metric__label">Dernier signal</span>
+              <strong id="urgent-last">—</strong>
+              <small>heure locale</small>
+            </div>
+            <div class="metric metric--accent">
+              <span class="metric__label">Fenêtre</span>
+              <strong>24 h</strong>
+              <small>glissantes</small>
+            </div>
+          </div>
+
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Priorité maximale</p>
+              <h2>Les alertes en cours</h2>
+            </div>
+            <button class="btn btn--ghost btn--small" type="button" data-action="refresh">
+              <img src="https://img.icons8.com/fluency/200/refresh.png" alt="" width="16" height="16">
+              Actualiser
+            </button>
+          </div>
+          <div class="urgent-grid" id="urgent-feed" aria-live="polite"></div>
+          <div class="feed-footer">
+            <p>Classification automatique par mots-clés et fraîcheur. Vérifiez toujours l'information à la source.</p>
+          </div>
+        </section>
+
+        <!-- RÉSUMÉ -->
+        <section class="view" id="view-summary" data-view="summary" aria-labelledby="summary-title" hidden>
+          <div class="summary-hero">
+            <div class="summary-hero__orb" aria-hidden="true"></div>
+            <div class="summary-hero__content">
+              <p class="eyebrow eyebrow--light"><span class="live-dot live-dot--light"></span> Synthèse quotidienne <span class="eyebrow__sep">·</span> <span id="summary-date">Aujourd'hui</span></p>
+              <h1 id="summary-title">Le monde,<br><em>en perspective.</em></h1>
+              <p>Une lecture neutre et sourcée des dernières 24 heures. Les lignes éditoriales extrêmes sont automatiquement écartées de la synthèse.</p>
+              <div class="summary-hero__actions">
+                <button class="btn btn--light" type="button" id="generate-summary">
+                  <img src="https://img.icons8.com/fluency/200/artificial-intelligence.png" alt="" width="19" height="19">
+                  <span>Générer le résumé</span>
+                </button>
+                <button class="btn btn--outline-light" type="button" data-action="copy-summary">
+                  <img src="https://img.icons8.com/fluency/200/copy.png" alt="" width="17" height="17">
+                  Copier
+                </button>
+              </div>
+              <div class="summary-hero__meta">
+                <span class="provider-pill" id="summary-provider">
+                  <img src="https://img.icons8.com/fluency/200/robot.png" alt="" width="15" height="15">
+                  En attente
+                </span>
+                <span><strong id="summary-analyzed">0</strong> articles analysés</span>
+                <span><strong id="summary-excluded">0</strong> sources extrêmes exclues</span>
+              </div>
+            </div>
+            <div class="summary-hero__visual" aria-hidden="true">
+              <div class="summary-ring">
+                <div class="summary-ring__inner">
+                  <img src="https://img.icons8.com/fluency/200/artificial-intelligence.png" alt="" width="52" height="52">
+                  <span>Équilibre</span>
+                </div>
+              </div>
+              <span class="summary-spark summary-spark--one"></span>
+              <span class="summary-spark summary-spark--two"></span>
+              <span class="summary-spark summary-spark--three"></span>
+            </div>
+          </div>
+
+          <div class="summary-layout">
+            <article class="summary-paper" id="summary-paper">
+              <div class="summary-paper__head">
+                <div>
+                  <p class="eyebrow">La synthèse</p>
+                  <h2>L'essentiel des dernières 24 heures</h2>
+                </div>
+                <span class="summary-stamp" id="summary-updated">Non générée</span>
+              </div>
+              <div id="summary-content" aria-live="polite">
+                <div class="summary-empty">
+                  <img src="https://img.icons8.com/fluency/200/artificial-intelligence.png" alt="" width="44" height="44">
+                  <h3>Votre synthèse se prépare</h3>
+                  <p>Tourmaline agrège les articles récents et écarte les positions extrêmes avant de générer une lecture équilibrée.</p>
+                  <button class="btn btn--primary" type="button" data-action="generate-summary">Générer maintenant</button>
+                </div>
+              </div>
+              <div class="summary-paper__foot">
+                <div class="summary-sources" id="summary-sources"></div>
+                <p class="summary-disclaimer">Synthèse assistée par IA. Elle peut comporter des imprécisions : les sources originales restent la référence.</p>
+              </div>
+            </article>
+
+            <aside class="summary-rail">
+              <article class="rail-card rail-card--method">
+                <div class="rail-card__head">
+                  <h3>Notre méthode</h3>
+                  <img src="https://img.icons8.com/fluency/200/shield.png" alt="" width="22" height="22">
+                </div>
+                <ol class="method-list">
+                  <li><span>01</span><p>Collecte des articles des dernières 24 heures.</p></li>
+                  <li><span>02</span><p>Exclusion automatique des sources classées extrême gauche ou extrême droite.</p></li>
+                  <li><span>03</span><p>Synthèse neutre, contextualisation et vérification des sources.</p></li>
+                </ol>
+                <div class="method-note">
+                  <img src="https://img.icons8.com/fluency/200/info.png" alt="" width="18" height="18">
+                  <p>Le spectre politique est une indication éditoriale, pas un label de qualité.</p>
+                </div>
+              </article>
+
+              <article class="rail-card">
+                <div class="rail-card__head">
+                  <h3>Sources de la synthèse</h3>
+                  <span class="count-pill" id="summary-source-count">0</span>
+                </div>
+                <div class="source-chips" id="summary-source-chips">
+                  <p class="muted">Aucune synthèse générée.</p>
+                </div>
+              </article>
+
+              <article class="rail-card rail-card--cta">
+                <img src="https://img.icons8.com/fluency/200/key.png" alt="" width="26" height="26">
+                <div>
+                  <h3>Une synthèse plus fine</h3>
+                  <p>Ajoutez votre clé Gemini pour une analyse rédigée par IA.</p>
+                  <button class="text-link" type="button" data-nav="me" data-focus="api-keys">Configurer Gemini</button>
+                </div>
+              </article>
+            </aside>
+          </div>
+        </section>
+
+        <!-- ENQUÊTES -->
+        <section class="view" id="view-investigations" data-view="investigations" aria-labelledby="investigations-title" hidden>
+          <div class="page-head page-head--investigations">
+            <div class="page-head__copy">
+              <p class="eyebrow"><span class="eyebrow-line"></span> Journalisme d'enquête</p>
+              <h1 id="investigations-title">Prendre le temps<br><span class="text-gradient">de comprendre.</span></h1>
+              <p class="lede">Longs formats, révélations et dossiers de fond. Une sélection resserrée de travaux d'investigation, loin du flux continu.</p>
+            </div>
+            <div class="editorial-note">
+              <span class="editorial-note__quote">“</span>
+              <p>Ce qui compte n'est pas d'être le premier à savoir, mais de comprendre ce qui se joue.</p>
+              <small>La rédaction Tourmaline</small>
+            </div>
+          </div>
+
+          <div class="section-heading section-heading--investigations">
+            <div>
+              <p class="eyebrow">Sélection longue lecture</p>
+              <h2>Les enquêtes à lire</h2>
+            </div>
+            <span class="count-pill"><strong id="investigation-count">0</strong> dossiers</span>
+          </div>
+          <div class="investigation-feed" id="investigation-feed" aria-live="polite"></div>
+          <div class="feed-footer">
+            <p>Les enquêtes sont identifiées à partir de sources spécialisées et de formats longs.</p>
+          </div>
+        </section>
+
+        <!-- MOI -->
+        <section class="view" id="view-me" data-view="me" aria-labelledby="profile-title" hidden>
+          <div class="page-head page-head--profile">
+            <div class="page-head__copy">
+              <p class="eyebrow">Votre espace</p>
+              <h1 id="profile-title">Moi, <span class="text-gradient">en confiance.</span></h1>
+              <p class="lede">Vos sources, vos préférences et votre synthèse. Tout reste sous votre contrôle.</p>
+            </div>
+          </div>
+
+          <div class="profile-grid">
+            <section class="profile-card profile-card--account" aria-labelledby="account-title">
+              <div class="profile-card__head">
+                <div>
+                  <p class="eyebrow">Compte</p>
+                  <h2 id="account-title">Connexion</h2>
+                </div>
+                <span class="status-dot status-dot--local" id="firebase-status"><i></i> Mode invité</span>
+              </div>
+
+              <div id="auth-guest">
+                <p class="profile-copy">Synchronisez vos sources, vos préférences et vos articles sauvegardés sur tous vos appareils.</p>
+                <div class="auth-tabs" role="tablist" aria-label="Authentification">
+                  <button class="auth-tab auth-tab--active" type="button" role="tab" aria-selected="true" data-auth-tab="login">Se connecter</button>
+                  <button class="auth-tab" type="button" role="tab" aria-selected="false" data-auth-tab="signup">Créer un compte</button>
+                </div>
+                <form class="auth-form" id="auth-form" novalidate>
+                  <label class="field" id="auth-name-field" hidden>
+                    <span>Nom affiché</span>
+                    <input type="text" id="auth-name" autocomplete="name" placeholder="Camille Martin">
+                  </label>
+                  <label class="field">
+                    <span>Adresse e-mail</span>
+                    <input type="email" id="auth-email" autocomplete="email" placeholder="vous@exemple.fr" required>
+                  </label>
+                  <label class="field">
+                    <span>Mot de passe</span>
+                    <input type="password" id="auth-password" autocomplete="current-password" placeholder="6 caractères minimum" minlength="6" required>
+                  </label>
+                  <div class="auth-form__row">
+                    <button class="text-link" type="button" id="forgot-password">Mot de passe oublié ?</button>
+                    <span class="auth-form__error" id="auth-error" role="alert"></span>
+                  </div>
+                  <button class="btn btn--primary btn--full" type="submit" id="auth-submit">
+                    Se connecter
+                    <img src="https://img.icons8.com/fluency/200/chevron-right.png" alt="" width="16" height="16">
+                  </button>
+                </form>
+                <p class="privacy-note"><img src="https://img.icons8.com/fluency/200/lock-2.png" alt="" width="15" height="15"> Vos données sont protégées par Firebase Auth et Firestore.</p>
+                <div class="config-warning" id="firebase-warning">
+                  <img src="https://img.icons8.com/fluency/200/broken-link.png" alt="" width="18" height="18">
+                  <p>Firebase n'est pas configuré. L'application fonctionne en mode local : ajoutez vos clés dans <code>js/firebase-config.js</code>.</p>
+                </div>
+              </div>
+
+              <div id="auth-user" hidden>
+                <div class="user-summary">
+                  <span class="avatar avatar--lg" id="profile-avatar">T</span>
+                  <div>
+                    <strong id="profile-name">Utilisateur</strong>
+                    <span id="profile-email">email@exemple.fr</span>
+                  </div>
+                </div>
+                <div class="user-actions">
+                  <button class="btn btn--ghost btn--small" type="button" id="sync-now">
+                    <img src="https://img.icons8.com/fluency/200/refresh.png" alt="" width="16" height="16">
+                    Synchroniser
+                  </button>
+                  <button class="btn btn--danger-quiet btn--small" type="button" id="sign-out">
+                    <img src="https://img.icons8.com/fluency/200/logout-rounded.png" alt="" width="16" height="16">
+                    Déconnexion
+                  </button>
+                </div>
+                <div class="sync-status" id="sync-status">
+                  <span class="status-dot status-dot--synced"><i></i> Synchronisé</span>
+                  <small>Dernière sync : à l'instant</small>
+                </div>
+              </div>
+            </section>
+
+            <section class="profile-card profile-card--install" aria-labelledby="install-title">
+              <div class="install-visual">
+                <img src="https://img.icons8.com/fluency/200/windows-11.png" alt="" width="42" height="42">
+                <span class="install-visual__app"><img src="assets/icons/icon-192.png" alt="" width="46" height="46"></span>
+              </div>
+              <div>
+                <p class="eyebrow">Application</p>
+                <h2 id="install-title">Installez Tourmaline</h2>
+                <p class="profile-copy">Un accès direct, en plein écran, avec un fil disponible hors connexion.</p>
+                <button class="btn btn--primary btn--small" type="button" id="install-btn">
+                  <img src="https://img.icons8.com/fluency/200/download.png" alt="" width="16" height="16">
+                  Installer l'application
+                </button>
+                <p class="install-hint" id="install-hint">Sur iOS : Partager → Sur l'écran d'accueil.</p>
+              </div>
+            </section>
+
+            <section class="profile-card" aria-labelledby="prefs-title">
+              <div class="profile-card__head">
+                <div>
+                  <p class="eyebrow">Préférences</p>
+                  <h2 id="prefs-title">Votre ligne éditoriale</h2>
+                </div>
+                <img src="https://img.icons8.com/fluency/200/scales.png" alt="" width="24" height="24">
+              </div>
+              <p class="profile-copy">Définissez la sensibilité vers laquelle équilibrer vos recommandations. Ce réglage ne filtre pas les extrêmes du Résumé IA : ils en sont toujours exclus.</p>
+              <div class="spectrum spectrum--profile" id="profile-spectrum">
+                <input type="range" id="pref-bias-slider" min="-2" max="2" step="1" value="0" aria-label="Ligne éditoriale préférée">
+                <div class="spectrum__rail" aria-hidden="true"></div>
+                <div class="spectrum__markers" aria-hidden="true">
+                  <span data-bias="-2">Extrême gauche</span>
+                  <span data-bias="-1">Centre gauche</span>
+                  <span data-bias="0">Centre</span>
+                  <span data-bias="1">Centre droit</span>
+                  <span data-bias="2">Extrême droite</span>
+                </div>
+              </div>
+              <div class="preference-value">
+                <span>Préférence actuelle</span>
+                <strong id="pref-bias-value">Centre</strong>
+              </div>
+              <label class="switch-row">
+                <span>
+                  <strong>Équilibrer le fil</strong>
+                  <small>Mélanger les sensibilités dans l'accueil</small>
+                </span>
+                <span class="switch">
+                  <input type="checkbox" id="pref-balanced" checked>
+                  <span class="switch__track"><span class="switch__thumb"></span></span>
+                </span>
+              </label>
+              <label class="switch-row">
+                <span>
+                  <strong>Actualisation automatique</strong>
+                  <small>Rafraîchir le fil toutes les 15 minutes</small>
+                </span>
+                <span class="switch">
+                  <input type="checkbox" id="pref-autorefresh" checked>
+                  <span class="switch__track"><span class="switch__thumb"></span></span>
+                </span>
+              </label>
+            </section>
+
+            <section class="profile-card" id="api-keys" aria-labelledby="api-title">
+              <div class="profile-card__head">
+                <div>
+                  <p class="eyebrow">Intégrations</p>
+                  <h2 id="api-title">Clés API</h2>
+                </div>
+                <img src="https://img.icons8.com/fluency/200/key.png" alt="" width="24" height="24">
+              </div>
+              <p class="profile-copy">Les clés sont stockées uniquement dans ce navigateur. Sans clé, Tourmaline utilise les flux RSS et la synthèse locale.</p>
+              <form class="api-form" id="api-form">
+                <label class="field">
+                  <span>Gemini API <small>Résumé IA</small></span>
+                  <span class="password-field">
+                    <input type="password" id="api-gemini" placeholder="AIza…" autocomplete="off" spellcheck="false">
+                    <button type="button" class="field__toggle" data-toggle-password="api-gemini" aria-label="Afficher la clé Gemini"><img src="https://img.icons8.com/fluency/200/visible.png" alt="" width="18" height="18"></button>
+                  </span>
+                </label>
+                <label class="field">
+                  <span>NewsAPI <small>Flux international</small></span>
+                  <span class="password-field">
+                    <input type="password" id="api-newsapi" placeholder="Votre clé NewsAPI" autocomplete="off" spellcheck="false">
+                    <button type="button" class="field__toggle" data-toggle-password="api-newsapi" aria-label="Afficher la clé NewsAPI"><img src="https://img.icons8.com/fluency/200/visible.png" alt="" width="18" height="18"></button>
+                  </span>
+                </label>
+                <label class="field">
+                  <span>GNews <small>Flux complémentaire</small></span>
+                  <span class="password-field">
+                    <input type="password" id="api-gnews" placeholder="Votre clé GNews" autocomplete="off" spellcheck="false">
+                    <button type="button" class="field__toggle" data-toggle-password="api-gnews" aria-label="Afficher la clé GNews"><img src="https://img.icons8.com/fluency/200/visible.png" alt="" width="18" height="18"></button>
+                  </span>
+                </label>
+                <label class="field">
+                  <span>RSS2JSON <small>Optionnel, pour les flux RSS</small></span>
+                  <span class="password-field">
+                    <input type="password" id="api-rss2json" placeholder="Votre clé RSS2JSON" autocomplete="off" spellcheck="false">
+                    <button type="button" class="field__toggle" data-toggle-password="api-rss2json" aria-label="Afficher la clé RSS2JSON"><img src="https://img.icons8.com/fluency/200/visible.png" alt="" width="18" height="18"></button>
+                  </span>
+                </label>
+                <button class="btn btn--primary btn--small" type="submit">Enregistrer les clés</button>
+              </form>
+            </section>
+
+            <section class="profile-card profile-card--wide" aria-labelledby="rss-title">
+              <div class="profile-card__head">
+                <div>
+                  <p class="eyebrow">Sources</p>
+                  <h2 id="rss-title">Flux RSS & médias</h2>
+                </div>
+                <span class="count-pill"><strong id="rss-active-count">0</strong> actifs</span>
+              </div>
+              <p class="profile-copy">Activez les sources de référence ou ajoutez vos propres flux. Chaque source porte une ligne éditoriale visible sur les articles.</p>
+              <div class="rss-list" id="rss-list"></div>
+              <details class="rss-add">
+                <summary>
+                  <img src="https://img.icons8.com/fluency/200/add.png" alt="" width="18" height="18">
+                  Ajouter un flux RSS
+                </summary>
+                <form class="rss-form" id="rss-form">
+                  <div class="form-grid">
+                    <label class="field">
+                      <span>Nom du média</span>
+                      <input type="text" id="rss-name" placeholder="Ex. La Croix" required>
+                    </label>
+                    <label class="field">
+                      <span>URL du flux RSS</span>
+                      <input type="url" id="rss-url" placeholder="https://exemple.fr/rss.xml" required>
+                    </label>
+                    <label class="field">
+                      <span>Ligne éditoriale</span>
+                      <span class="select-wrap">
+                        <select id="rss-bias">
+                          <option value="-2">Extrême gauche</option>
+                          <option value="-1">Centre gauche</option>
+                          <option value="0" selected>Centre</option>
+                          <option value="1">Centre droit</option>
+                          <option value="2">Extrême droite</option>
+                        </select>
+                        <img src="https://img.icons8.com/fluency/200/chevron-down.png" alt="" width="16" height="16">
+                      </span>
+                    </label>
+                    <label class="field">
+                      <span>Catégorie</span>
+                      <span class="select-wrap">
+                        <select id="rss-category">
+                          <option value="monde">Monde</option>
+                          <option value="politique">Politique</option>
+                          <option value="economie">Économie</option>
+                          <option value="tech">Tech</option>
+                          <option value="societe">Société</option>
+                          <option value="environnement">Environnement</option>
+                          <option value="culture">Culture</option>
+                          <option value="investigations">Enquêtes</option>
+                        </select>
+                        <img src="https://img.icons8.com/fluency/200/chevron-down.png" alt="" width="16" height="16">
+                      </span>
+                    </label>
+                    <label class="field">
+                      <span>Pays</span>
+                      <span class="select-wrap">
+                        <select id="rss-country">
+                          <option value="FR">France</option>
+                          <option value="GB">Royaume-Uni</option>
+                          <option value="US">États-Unis</option>
+                          <option value="INT">International</option>
+                        </select>
+                        <img src="https://img.icons8.com/fluency/200/chevron-down.png" alt="" width="16" height="16">
+                      </span>
+                    </label>
+                  </div>
+                  <label class="switch-row switch-row--compact">
+                    <span>
+                      <strong>Source d'investigation</strong>
+                      <small>Marquer ce flux comme long format / enquête</small>
+                    </span>
+                    <span class="switch">
+                      <input type="checkbox" id="rss-investigation">
+                      <span class="switch__track"><span class="switch__thumb"></span></span>
+                    </span>
+                  </label>
+                  <div class="rss-form__actions">
+                    <p class="form-error" id="rss-error" role="alert"></p>
+                    <button class="btn btn--primary btn--small" type="submit">Ajouter la source</button>
+                  </div>
+                </form>
+              </details>
+            </section>
+
+            <section class="profile-card profile-card--wide" aria-labelledby="saved-title">
+              <div class="profile-card__head">
+                <div>
+                  <p class="eyebrow">Bibliothèque</p>
+                  <h2 id="saved-title">Articles sauvegardés</h2>
+                </div>
+                <span class="count-pill"><strong id="saved-count">0</strong></span>
+              </div>
+              <div class="saved-list" id="saved-list">
+                <p class="muted">Vos articles sauvegardés apparaîtront ici.</p>
+              </div>
+            </section>
+
+            <section class="profile-card profile-card--wide profile-card--about" aria-labelledby="about-title">
+              <div class="profile-card__head">
+                <div>
+                  <p class="eyebrow">À propos</p>
+                  <h2 id="about-title">Tourmaline</h2>
+                </div>
+                <img src="https://img.icons8.com/fluency/200/diamond.png" alt="" width="26" height="26">
+              </div>
+              <p class="profile-copy">Tourmaline est une application de lecture d'actualité indépendante : un flux apaisé, un résumé équilibré, des sources à portée de main. Aucun contenu n'est hébergé : chaque carte renvoie à son média d'origine.</p>
+              <div class="about-grid">
+                <span><strong>PWA</strong><small>Installable et hors ligne</small></span>
+                <span><strong>5</strong><small>positions éditoriales</small></span>
+                <span><strong>IA</strong><small>Gemini + local</small></span>
+                <span><strong>RSS</strong><small>Sources libres</small></span>
+              </div>
+            </section>
+          </div>
+        </section>
+      </main>
+
+      <footer class="app-footer">
+        <span>Tourmaline · L'actualité en clair</span>
+        <span>Icônes par <a href="https://icons8.com" target="_blank" rel="noopener">Icons8</a> · Sources originales respectées</span>
+      </footer>
+    </div>
+
+    <nav class="bottom-nav" aria-label="Navigation mobile">
+      <button class="bottom-nav__item" type="button" data-nav="home">
+        <img src="https://img.icons8.com/fluency/200/home.png" alt="" width="22" height="22">
+        <span>Accueil</span>
+      </button>
+      <button class="bottom-nav__item" type="button" data-nav="urgent">
+        <img src="https://img.icons8.com/fluency/200/fire-element.png" alt="" width="22" height="22">
+        <span>Urgent</span>
+      </button>
+      <button class="bottom-nav__item bottom-nav__item--center" type="button" data-nav="summary">
+        <span class="bottom-nav__orb">
+          <img src="https://img.icons8.com/fluency/200/artificial-intelligence.png" alt="" width="24" height="24">
+        </span>
+        <span>Résumé</span>
+      </button>
+      <button class="bottom-nav__item" type="button" data-nav="investigations">
+        <img src="https://img.icons8.com/fluency/200/microscope.png" alt="" width="22" height="22">
+        <span>Enquêtes</span>
+      </button>
+      <button class="bottom-nav__item" type="button" data-nav="me">
+        <img src="https://img.icons8.com/fluency/200/user-account.png" alt="" width="22" height="22">
+        <span>Moi</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- LECTEUR D'ARTICLE -->
+  <div class="reader" id="reader" role="dialog" aria-modal="true" aria-labelledby="reader-title" hidden>
+    <div class="reader__scrim" data-action="close-reader"></div>
+    <div class="reader__panel" role="document">
+      <div class="reader__progress"><span id="reader-progress-bar"></span></div>
+      <div class="reader__toolbar">
+        <button class="reader__close" type="button" data-action="close-reader" aria-label="Fermer le lecteur">
+          <img src="https://img.icons8.com/fluency/200/chevron-left.png" alt="" width="20" height="20">
+          <span>Retour</span>
+        </button>
+        <div class="reader__toolbar-center" id="reader-source-line">Tourmaline</div>
+        <div class="reader__toolbar-actions">
+          <button class="reader-action" type="button" id="reader-save" aria-label="Sauvegarder l'article">
+            <img src="https://img.icons8.com/fluency/200/bookmark.png" alt="" width="19" height="19">
+            <span>Sauver</span>
+          </button>
+          <button class="reader-action" type="button" id="reader-print" aria-label="Imprimer l'article">
+            <img src="https://img.icons8.com/fluency/200/print.png" alt="" width="19" height="19">
+            <span>Imprimer</span>
+          </button>
+          <div class="download-menu-wrap">
+            <button class="reader-action" type="button" id="reader-download" aria-haspopup="menu" aria-expanded="false" aria-controls="download-menu">
+              <img src="https://img.icons8.com/fluency/200/download.png" alt="" width="19" height="19">
+              <span>Télécharger</span>
+            </button>
+            <div class="download-menu" id="download-menu" role="menu" hidden>
+              <button type="button" role="menuitem" data-download="pdf">
+                <img src="https://img.icons8.com/fluency/200/pdf-2.png" alt="" width="20" height="20">
+                <span><strong>PDF</strong><small>Mise en page lecture</small></span>
+              </button>
+              <button type="button" role="menuitem" data-download="md">
+                <img src="https://img.icons8.com/fluency/200/markdown.png" alt="" width="20" height="20">
+                <span><strong>Markdown</strong><small>Texte structuré .md</small></span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="reader__scroll" id="reader-scroll">
+        <article class="reader__article" id="reader-article">
+          <header class="reader__header">
+            <div class="reader__meta">
+              <span class="bias-badge bias-badge--0" id="reader-bias">Centre</span>
+              <span id="reader-date">—</span>
+              <span class="reader__meta-sep"></span>
+              <span id="reader-reading-time">— min de lecture</span>
+            </div>
+            <h1 id="reader-title">Titre de l'article</h1>
+            <p class="reader__dek" id="reader-dek"></p>
+            <div class="reader__byline">
+              <span class="avatar avatar--sm avatar--source" id="reader-source-avatar">T</span>
+              <div>
+                <strong id="reader-source">Source</strong>
+                <small id="reader-author">Auteur</small>
+              </div>
+              <a class="reader__original" href="#" id="reader-original" target="_blank" rel="noopener">
+                Article original
+                <img src="https://img.icons8.com/fluency/200/external-link.png" alt="" width="15" height="15">
+              </a>
+            </div>
+          </header>
+          <figure class="reader__figure" id="reader-figure" hidden>
+            <img id="reader-image" src="" alt="">
+            <figcaption id="reader-caption"></figcaption>
+          </figure>
+          <div class="reader__body" id="reader-body"></div>
+          <div class="reader__end">
+            <div class="reader__end-mark">
+              <img src="https://img.icons8.com/fluency/200/diamond.png" alt="" width="20" height="20">
+            </div>
+            <p>Fin de la lecture. Retrouvez l'intégralité et les mises à jour chez <strong id="reader-source-end">la source</strong>.</p>
+            <a class="btn btn--primary btn--small" href="#" id="reader-original-end" target="_blank" rel="noopener">
+              Lire chez la source
+              <img src="https://img.icons8.com/fluency/200/external-link.png" alt="" width="15" height="15">
+            </a>
+          </div>
+        </article>
+      </div>
+    </div>
+  </div>
+
+  <!-- RECHERCHE GLOBALE -->
+  <div class="search-overlay" id="search-overlay" role="dialog" aria-modal="true" aria-labelledby="search-title" hidden>
+    <div class="search-overlay__scrim" data-action="close-search"></div>
+    <div class="search-panel">
+      <div class="search-panel__input">
+        <img src="https://img.icons8.com/fluency/200/search.png" alt="" width="23" height="23">
+        <input type="search" id="search-input" placeholder="Rechercher un sujet, une source, un mot-clé…" autocomplete="off" aria-label="Rechercher">
+        <button class="icon-btn icon-btn--small" type="button" data-action="close-search" aria-label="Fermer la recherche">
+          <img src="https://img.icons8.com/fluency/200/delete-sign.png" alt="" width="18" height="18">
+        </button>
+      </div>
+      <div class="search-panel__hints" id="search-hints">
+        <span>Suggestions</span>
+        <button type="button" data-search-hint="climat">Climat</button>
+        <button type="button" data-search-hint="intelligence artificielle">Intelligence artificielle</button>
+        <button type="button" data-search-hint="économie">Économie</button>
+        <button type="button" data-search-hint="Europe">Europe</button>
+      </div>
+      <div class="search-results" id="search-results">
+        <p class="search-empty">Tapez quelques lettres pour explorer le fil.</p>
+      </div>
+      <div class="search-panel__foot">
+        <span><kbd>↵</kbd> ouvrir</span>
+        <span><kbd>Échap</kbd> fermer</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- NOTIFICATIONS -->
+  <div class="toast-stack" id="toast-stack" aria-live="polite" aria-atomic="false"></div>
+
+  <noscript>
+    <div class="noscript-warning">Tourmaline a besoin de JavaScript pour charger le fil d'actualité.</div>
+  </noscript>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

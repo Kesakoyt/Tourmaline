@@ -1,0 +1,47 @@
+rules_version = '2';
+
+/* ==========================================================================
+   Tourmaline — Règles Firestore
+   --------------------------------------------------------------------------
+   - Chaque utilisateur lit et écrit uniquement son propre espace :
+       users/{uid}
+       users/{uid}/rss_sources/{sourceId}
+       users/{uid}/saved_articles/{articleId}
+   - Les synthèses quotidiennes sont publiques en lecture (partage),
+     mais leur création / mise à jour exige un compte authentifié.
+   ========================================================================== */
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function ownsUser(userId) {
+      return signedIn() && request.auth.uid == userId;
+    }
+
+    match /users/{userId} {
+      allow read, write: if ownsUser(userId);
+
+      match /rss_sources/{sourceId} {
+        allow read, write: if ownsUser(userId);
+      }
+
+      match /saved_articles/{articleId} {
+        allow read, write: if ownsUser(userId);
+      }
+    }
+
+    match /daily_summaries/{summaryId} {
+      allow read: if true;
+      allow create, update: if signedIn();
+      allow delete: if false;
+    }
+
+    /* Tout le reste est refusé par défaut. */
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
